@@ -1,11 +1,10 @@
 package de.dreierschach.app.views.dreierschach;
 
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.NativeLabel;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -15,7 +14,7 @@ import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.theme.lumo.LumoThemeDefinition;
+import de.dreierschach.app.BoardExporter;
 import de.dreierschach.app.engine.DreierschachEngine;
 import de.dreierschach.app.model.*;
 import de.dreierschach.app.views.MainLayout;
@@ -31,13 +30,16 @@ public class DreierschachView extends HorizontalLayout {
 
     private static final String[] COLORS_BG = {"#614f32", "#f0f0e0", "#b99f77"};
 
+    private final BoardExporter boardExporter;
     private Canvas canvas;
+
     private final HorizontalLayout content;
     private final TextArea protocol;
-    private final Label player;
+    private final NativeLabel player;
     private final HorizontalLayout check;
     private final Button zoomInButton;
     private final Button zoomOutButton;
+    private final Button exportButton;
 
     private double width = 1024;
     private int height;
@@ -50,8 +52,9 @@ public class DreierschachView extends HorizontalLayout {
 
     private Pos from = null;
 
-    public DreierschachView(DreierschachEngine engine) {
+    public DreierschachView(DreierschachEngine engine, BoardExporter boardExporter) {
         this.engine = engine;
+        this.boardExporter = boardExporter;
         board = this.engine.board();
 
         setMargin(true);
@@ -69,7 +72,7 @@ public class DreierschachView extends HorizontalLayout {
         protocol.setWidth(30, Unit.EM);
         protocol.setHeight(100, Unit.PERCENTAGE);
 
-        player = new Label();
+        player = new NativeLabel();
         check = new HorizontalLayout();
 
         var state = new HorizontalLayout(new VerticalLayout(player), check);
@@ -82,7 +85,9 @@ public class DreierschachView extends HorizontalLayout {
         zoomOutButton.addClickShortcut(Key.KEY_A);
         zoomOutButton.getElement().setProperty("title", "[a]");
         zoomOutButton.getStyle().set("--lumo-button-size", "var(--lumo-size-xs)");
-        var zoomPanel = new VerticalLayout(zoomInButton, zoomOutButton);
+        exportButton = new Button("Export");
+        exportButton.addClickListener(event -> System.out.println(boardExporter.toJson(board)));
+        var zoomPanel = new VerticalLayout(zoomInButton, zoomOutButton, exportButton);
         zoomPanel.setSizeUndefined();
         zoomInButton.addClickListener(event -> {
             if (this.width <= 2500) {

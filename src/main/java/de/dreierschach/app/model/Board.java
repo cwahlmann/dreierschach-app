@@ -1,17 +1,23 @@
 package de.dreierschach.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class Board {
 
+    @JsonIgnore
     private final List<Consumer<FieldChangeEvent>> fieldChangeListeners;
+    @JsonIgnore
     private final List<Consumer<PlayerChangeEvent>> playerChangeListeners;
+    @JsonIgnore
     private final List<Consumer<MoveEvent>> moveListeners;
+    @JsonIgnore
     private final List<Consumer<CheckEvent>> checkListeners;
 
-    private final Figure[][] figures;
+    private Figure[][] figures;
     private final Set<Color> castelingForbidden;
     private final Set<Color> check;
     private Color player;
@@ -59,10 +65,37 @@ public class Board {
         return result;
     }
 
+    public Figure[][] getFigures() {
+        return figures;
+    }
+
+    public void setFigures(Figure[][] figures) {
+        this.figures = figures;
+    }
+
+    public Set<Color> getCastelingForbidden() {
+        return castelingForbidden;
+    }
+
+    public Set<Color> getCheck() {
+        return check;
+    }
+
+    public Board withPlayer(Color player) {
+        this.player = player;
+        return this;
+    }
+
+    public Map<Color, Pos> getKingsPositions() {
+        return kingsPositions;
+    }
+
+    @JsonIgnore
     public Color getPlayer() {
         return player;
     }
 
+    @JsonIgnore
     public Board setPlayer(Color player) {
         var oldValue = this.player;
         this.player = player;
@@ -84,6 +117,7 @@ public class Board {
         return this;
     }
 
+    @JsonIgnore
     public Board set(Figure figure, Pos pos) {
         if (pos.isValid()) {
             var oldValue = figures[pos.y()][pos.x()];
@@ -96,14 +130,17 @@ public class Board {
         return this;
     }
 
+    @JsonIgnore
     public Figure get(Pos pos) {
         return pos.isValid() ? figures[pos.y()][pos.x()] : Figure.NONE;
     }
 
+    @JsonIgnore
     public Pos getKingsPosition(Color color) {
         return kingsPositions.get(color);
     }
 
+    @JsonIgnore
     public void setCheck(Set<Color> players) {
         var oldValue = new HashSet<>(this.check);
         var newValue = new HashSet<>(players);
@@ -112,14 +149,17 @@ public class Board {
         notifyCheckListeners(new CheckEvent(oldValue, newValue));
     }
 
+    @JsonIgnore
     public boolean isCheck(Color player) {
         return check.contains(player);
     }
 
+    @JsonIgnore
     public Stream<Move> getMoves() {
         return moves.stream();
     }
 
+    @JsonIgnore
     public Move getLastMove() {
         if (moves.isEmpty()) {
             return null;
@@ -127,6 +167,7 @@ public class Board {
         return moves.get(moves.size() - 1);
     }
 
+    @JsonIgnore
     public String getLastMoveAsString() {
         Move move = getLastMove();
         if (move == null) {
@@ -275,6 +316,7 @@ public class Board {
         return this;
     }
 
+    @JsonIgnore
     public boolean isCastelingForbidden(Color color) {
         return castelingForbidden.contains(color);
     }
